@@ -94,3 +94,81 @@ The system should allow the user to view a history of all their logged workouts.
 The system should calculate and display the total calories burned and total time spent exercising over all time.
 The system should be able to filter workouts by exercise type, showing only workouts matching a specific type.
 ```
+
+---
+
+## 🛠 Technologies & Tools
+
+This project is built on a modern, high-performance stack designed for AI agent orchestration and real-time user interaction:
+
+* **[CrewAI](https://crewai.com/)**: The core framework orchestrating the multi-agent AI engineering team.
+* **[FastAPI](https://fastapi.tiangolo.com/)**: A high-performance async Python backend that manages sandbox execution and streams live logs via WebSockets/HTTP streams.
+* **[React](https://react.dev/) + [Vite](https://vitejs.dev/)**: The blazing-fast frontend powering the split-pane IDE experience.
+* **[Tailwind CSS](https://tailwindcss.com/)**: For beautiful, responsive styling and typography (using the `@tailwindcss/typography` plugin).
+* **[Gradio](https://www.gradio.app/)**: The framework our AI agents use to rapidly spin up and serve web interfaces dynamically inside the sandbox.
+* **[uv](https://github.com/astral-sh/uv)**: Astral's ultra-fast Python package installer and environment manager, used to run the isolated agent sandbox securely.
+
+---
+
+## 🧠 Agent Architecture
+
+Our system operates using a specialized team of autonomous AI agents working collaboratively in a shared local sandbox. Here is how they interact when you submit a prompt:
+
+```mermaid
+graph TD
+    User([User]) -->|Provides Requirements| WebUI[React Web Interface]
+    WebUI -->|POST /api/build| Backend[FastAPI Server]
+    
+    Backend -->|Spawns Subprocess| CrewCLI[run_crew_cli.py]
+    
+    subgraph "🤖 Agentic Engineering Team"
+        Lead[Lead Architect] 
+        BackendDev[Python Backend Engineer]
+        FrontendDev[Gradio Frontend Engineer]
+        QA[QA Test Engineer]
+        
+        Lead -->|1. Creates design.md| BackendDev
+        Lead -->|1. Creates design.md| FrontendDev
+        BackendDev -->|2. Writes backend.py| QA
+        FrontendDev -->|3. Writes app.py| QA
+    end
+    
+    CrewCLI --> Lead
+    
+    BackendDev -.->|Uses WriteFileTool| Sandbox[(Local Sandbox)]
+    FrontendDev -.->|Uses WriteFileTool| Sandbox
+    QA -.->|4. Uses ExecuteCommandTool to run tests| Sandbox
+    
+    CrewCLI -.->|Streams raw stdout logs| Backend
+    Backend -.->|Filters & Sends Clean Logs| WebUI
+```
+
+### Agent Configuration Code
+Agents are defined using YAML and connected to their tools in python. Here is a quick look at how the agents are wired up with our custom file-system tools:
+
+```python
+# src/agentic_fullstack_builder/crew.py
+from crewai import Agent, Crew, Process, Task
+from crewai.project import CrewBase, agent, crew, task
+from agentic_fullstack_builder.tools import sandbox_tools
+
+@CrewBase
+class EngineeringTeam:
+    """The Autonomous Engineering Team"""
+
+    @agent
+    def engineering_lead(self) -> Agent:
+        return Agent(
+            config=self.agents_config['engineering_lead'],
+            tools=[sandbox_tools.WriteFileTool(), sandbox_tools.ExecuteCommandTool()],
+            verbose=True
+        )
+
+    @agent
+    def python_backend_engineer(self) -> Agent:
+        return Agent(
+            config=self.agents_config['python_backend_engineer'],
+            tools=[sandbox_tools.WriteFileTool()],
+            verbose=True
+        )
+```
