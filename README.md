@@ -2,6 +2,12 @@
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat-square&logo=fastapi&logoColor=white) ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![Vite](https://img.shields.io/badge/Vite-B73BFE?style=flat-square&logo=vite&logoColor=FFD62E) ![CrewAI](https://img.shields.io/badge/CrewAI-FF4F00?style=flat-square&logoColor=white) ![Gradio](https://img.shields.io/badge/Gradio-FF7C00?style=flat-square&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
 
+
+https://github.com/user-attachments/assets/e8466f2b-0813-4300-9f86-2cf3d38a6b6f
+
+
+
+
 Welcome to the **Agentic Fullstack Builder**—an autonomous IDE where you type your requirements and watch AI build your app right before your eyes. 
 
 Powered by **[crewAI](https://crewai.com)**, this project leverages a multi-agent AI system (an "Agentic Engineering Team") to collaboratively design, code, and test complete applications. Unlike standard single-prompt code generators, our system utilizes specialized agents—a Lead Architect, Backend Developer, Frontend Developer, and QA Engineer—working together dynamically in a shared local sandbox to construct robust, runnable software from scratch.
