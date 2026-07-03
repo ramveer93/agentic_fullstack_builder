@@ -1,52 +1,46 @@
-from typing import List, Dict
+from typing import List, Optional
 
-class User:
-    def __init__(self, user_id: str, name: str) -> None:
-        self.user_id = user_id
-        self.name = name
-        self.balance = 0.0
+class Appointment:
+    def __init__(self, patient_name: str, doctor_name: str, time_slot: str):
+        self.patient_name = patient_name
+        self.doctor_name = doctor_name
+        self.time_slot = time_slot
 
-    def update_balance(self, amount: float) -> None:
-        self.balance += amount
+    def __str__(self) -> str:
+        return f'Appointment(Patient: {self.patient_name}, Doctor: {self.doctor_name}, Time: {self.time_slot})'
 
-class Expense:
-    def __init__(self, expense_id: str, description: str, amount: float, paid_by: User) -> None:
-        self.expense_id = expense_id
-        self.description = description
-        self.amount = amount
-        self.paid_by = paid_by
+class AppointmentManager:
+    def __init__(self):
+        self.appointments: List[Appointment] = []
+        self.doctors: List[str] = ['Dr. Smith', 'Dr. Jones', 'Dr. Brown']
 
-    def split_expense(self, users: List[User]) -> Dict[str, float]:
-        share = self.amount / len(users)
-        self.paid_by.update_balance(-self.amount)  # Update payer's balance
-        for user in users:
-            user.update_balance(share)
-        return {user.name: user.balance for user in users}
+    def book_appointment(self, patient_name: str, doctor_name: str, time_slot: str) -> bool:
+        if not self.is_time_slot_available(doctor_name, time_slot):
+            return False
+        new_appointment = Appointment(patient_name, doctor_name, time_slot)
+        self.appointments.append(new_appointment)
+        return True
 
-class Group:
-    def __init__(self, group_id: str) -> None:
-        self.group_id = group_id
-        self.users = []
-        self.expenses = []
+    def view_appointments(self, doctor_name: str) -> List[Appointment]:
+        return [appointment for appointment in self.appointments if appointment.doctor_name == doctor_name]
 
-    def add_user(self, user: User) -> None:
-        self.users.append(user)
+    def cancel_appointment(self, patient_name: str, doctor_name: str, time_slot: str) -> bool:
+        for appointment in self.appointments:
+            if (appointment.patient_name == patient_name and 
+                appointment.doctor_name == doctor_name and 
+                appointment.time_slot == time_slot):
+                self.appointments.remove(appointment)
+                return True
+        return False
 
-    def add_expense(self, expense: Expense) -> None:
-        expense.split_expense(self.users)
-        self.expenses.append(expense)
+    def list_doctors(self) -> List[str]:
+        return self.doctors
 
-    def get_balances(self) -> Dict[str, float]:
-        return {user.name: user.balance for user in self.users}
+    def is_time_slot_available(self, doctor_name: str, time_slot: str) -> bool:
+        for appointment in self.appointments:
+            if appointment.doctor_name == doctor_name and appointment.time_slot == time_slot:
+                return False
+        return True
 
-# Function to create user
-def create_user(name: str) -> User:
-    return User(user_id=name.lower(), name=name)
-
-# Function to create expense
-def create_expense(description: str, amount: float, paid_by: User) -> Expense:
-    return Expense(expense_id=description.lower(), description=description, amount=amount, paid_by=paid_by)
-
-# Function to get group summary
-def get_group_summary(group: Group) -> Dict[str, float]:
-    return group.get_balances()
+    def current_appointments(self) -> List[Appointment]:
+        return self.appointments

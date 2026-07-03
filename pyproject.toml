@@ -1,5 +1,5 @@
 [project]
-name = "agentic_fullstack_builder"
+name = "agentic-fullstack-builder"
 version = "0.1.0"
 description = "agentic-fullstack-builder using crewAI"
 authors = [{ name = "Your Name", email = "you@example.com" }]

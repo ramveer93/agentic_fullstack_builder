@@ -1,0 +1,15 @@
+/Users/ramveersingh/projects/agentic_fullstack_builder/.venv/lib/python3.13/site-packages/gradio/routes.py:1379: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+  return await queue_join_helper(body, request, username)
+/Users/ramveersingh/projects/agentic_fullstack_builder/.venv/lib/python3.13/site-packages/gradio/routes.py:1379: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+  return await queue_join_helper(body, request, username)
+/Users/ramveersingh/projects/agentic_fullstack_builder/.venv/lib/python3.13/site-packages/gradio/routes.py:1379: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+  return await queue_join_helper(body, request, username)
+/Users/ramveersingh/projects/agentic_fullstack_builder/.venv/lib/python3.13/site-packages/gradio/routes.py:1379: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+  return await queue_join_helper(body, request, username)
+/Users/ramveersingh/projects/agentic_fullstack_builder/.venv/lib/python3.13/site-packages/gradio/routes.py:1379: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+  return await queue_join_helper(body, request, username)
+/Users/ramveersingh/projects/agentic_fullstack_builder/.venv/lib/python3.13/site-packages/gradio/routes.py:1379: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+  return await queue_join_helper(body, request, username)
+* Running on local URL:  http://127.0.0.1:7861
+* To create a public link, set `share=True` in `launch()`.
+Keyboard interruption in main thread... closing server.

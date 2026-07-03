@@ -121,11 +121,15 @@ async def run_sandbox():
     except Exception:
         pass
         
-    # Run detached
+    # Run detached without inheriting file descriptors to prevent request hangs
+    log_file = open(os.path.join(sandbox_dir, "sandbox.log"), "w")
     subprocess.Popen(
         ["uv", "run", "app.py"],
         cwd=sandbox_dir,
-        env=env
+        env=env,
+        stdout=log_file,
+        stderr=subprocess.STDOUT,
+        close_fds=True
     )
     
     return {"status": "started", "port": 7861}
@@ -137,7 +141,26 @@ import zipfile
 @app.get("/api/download")
 async def download_codebase():
     sandbox_dir = "sandbox"
+    download_filename = "generated_app.zip"
     
+    # Try to extract a smart name from design.md
+    design_path = os.path.join(sandbox_dir, "design.md")
+    if os.path.exists(design_path):
+        try:
+            with open(design_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("# "):
+                        title = line[2:].strip()
+                        # Slugify the title and remove '-design' if present at the end
+                        slug = re.sub(r'[^a-zA-Z0-9]+', '-', title).strip('-').lower()
+                        slug = re.sub(r'-design$', '', slug)
+                        if slug:
+                            download_filename = f"{slug}.zip"
+                        break
+        except Exception:
+            pass
+            
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
         
@@ -156,5 +179,5 @@ async def download_codebase():
     return Response(
         content=zip_buffer.getvalue(),
         media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=generated_app.zip"}
+        headers={"Content-Disposition": f"attachment; filename={download_filename}"}
     )

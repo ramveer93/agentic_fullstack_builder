@@ -1,46 +1,66 @@
 import gradio as gr
-from backend import create_user, create_expense, Group
+from backend import AppointmentManager
 
-class ExpenseManager:
-    def __init__(self):
-        self.group = Group('Default Group')
+# Initialize AppointmentManager instance
+manager = AppointmentManager()
 
-    def add_user(self, name: str):
-        user = create_user(name)
-        self.group.add_user(user)
-        return f"User '{name}' added successfully!"
+# Function to book an appointment
 
-    def add_expense(self, description: str, amount: float, paid_by: str):
-        user = next((u for u in self.group.users if u.name == paid_by), None)
-        if user:
-            expense = create_expense(description, amount, user)
-            self.group.add_expense(expense)
-            return self.group.get_balances()
-        return "User not found."
+def book_appointment_interface(patient_name: str, doctor_name: str, time_slot: str) -> str:
+    success = manager.book_appointment(patient_name, doctor_name, time_slot)
+    return "Appointment booked!" if success else "Time slot is not available."
 
-    def view_balances(self):
-        return self.group.get_balances()
+# Function to view appointments for a specific doctor
 
-expense_manager = ExpenseManager()
+def view_appointments_interface(doctor_name: str) -> list:
+    appointments = manager.view_appointments(doctor_name)
+    return [str(appointment) for appointment in appointments]
 
-with gr.Blocks() as app:
-    gr.Markdown("# Expense Splitting Application")
-    with gr.Tab("Add User"):
-        user_name = gr.Textbox(label="User Name")
-        add_user_btn = gr.Button("Add User")
-        user_output = gr.Textbox(label="", interactive=False)
-        add_user_btn.click(expense_manager.add_user, inputs=user_name, outputs=user_output)
-    with gr.Tab("Add Expense"):
-        expense_desc = gr.Textbox(label="Expense Description")
-        expense_amount = gr.Number(label="Amount")
-        paid_by = gr.Textbox(label="Paid By (User Name)")
-        add_expense_btn = gr.Button("Add Expense")
-        expense_output = gr.Textbox(label="", interactive=False)
-        add_expense_btn.click(expense_manager.add_expense, inputs=[expense_desc, expense_amount, paid_by], outputs=expense_output)
-    with gr.Tab("View Balances"):
-        view_balances_btn = gr.Button("Refresh Balances")
-        balances_output = gr.Textbox(label="", interactive=False)
-        view_balances_btn.click(expense_manager.view_balances, outputs=balances_output)
+# Function to cancel an existing appointment
 
-if __name__ == "__main__":
+def cancel_appointment_interface(patient_name: str, doctor_name: str, time_slot: str) -> str:
+    success = manager.cancel_appointment(patient_name, doctor_name, time_slot)
+    return "Appointment canceled!" if success else "No appointment found to cancel."
+
+# Function to list all available doctors
+
+def list_doctors_interface() -> list:
+    return manager.list_doctors()
+
+# Define the Gradio interface
+app = gr.Blocks()
+
+with app:
+    gr.Markdown("# Appointment Management System")
+    with gr.Row():
+        with gr.Column():
+            gr.Markdown("## Book an Appointment")
+            patient_name = gr.Textbox(label="Patient Name")
+            doctor_name = gr.Dropdown(choices=manager.list_doctors(), label="Doctor Name")
+            time_slot = gr.Textbox(label="Time Slot (e.g. '2024-10-15 10:00 AM')")
+            book_button = gr.Button("Book Appointment")
+            book_output = gr.Textbox(label="Booking Status")
+            book_button.click(book_appointment_interface, inputs=[patient_name, doctor_name, time_slot], outputs=book_output)
+            
+            gr.Markdown("## View Appointments")
+            view_doctor = gr.Dropdown(choices=manager.list_doctors(), label="Select Doctor")
+            view_button = gr.Button("View Appointments")
+            view_output = gr.Textbox(label="Appointments")
+            view_button.click(view_appointments_interface, inputs=view_doctor, outputs=view_output)
+
+            gr.Markdown("## Cancel an Appointment")
+            cancel_patient_name = gr.Textbox(label="Patient Name")
+            cancel_doctor_name = gr.Dropdown(choices=manager.list_doctors(), label="Doctor Name")
+            cancel_time_slot = gr.Textbox(label="Time Slot (e.g. '2024-10-15 10:00 AM')")
+            cancel_button = gr.Button("Cancel Appointment")
+            cancel_output = gr.Textbox(label="Cancellation Status")
+            cancel_button.click(cancel_appointment_interface, inputs=[cancel_patient_name, cancel_doctor_name, cancel_time_slot], outputs=cancel_output)
+
+            gr.Markdown("## List of Doctors")
+            list_doctors_button = gr.Button("List Doctors")
+            list_doctors_output = gr.Textbox(label="Doctors")
+            list_doctors_button.click(list_doctors_interface, outputs=list_doctors_output)
+
+# Launch the app
+if __name__ == '__main__':
     app.launch()

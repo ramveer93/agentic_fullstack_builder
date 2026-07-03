@@ -1,73 +1,41 @@
 ```python
 import unittest
-from backend import User, Expense, Group, create_user, create_expense
+from backend import Appointment, AppointmentManager
 
+class TestAppointmentManager(unittest.TestCase):
 
-class TestUser(unittest.TestCase):
-    def test_user_initialization(self):
-        user = create_user('Alice')
-        self.assertEqual(user.name, 'Alice')
-        self.assertEqual(user.balance, 0.0)
+    def setUp(self):
+        self.manager = AppointmentManager()
 
-    def test_update_balance_increase(self):
-        user = create_user('Bob')
-        user.update_balance(50.0)
-        self.assertEqual(user.balance, 50.0)
+    def test_book_appointment(self):
+        result = self.manager.book_appointment('John Doe', 'Dr. Smith', '2024-10-15 10:00 AM')
+        self.assertTrue(result)
+        self.assertEqual(len(self.manager.current_appointments()), 1)
 
-    def test_update_balance_decrease(self):
-        user = create_user('Charlie')
-        user.update_balance(-30.0)
-        self.assertEqual(user.balance, -30.0)
+        # Try to double book
+        result = self.manager.book_appointment('Jane Doe', 'Dr. Smith', '2024-10-15 10:00 AM')
+        self.assertFalse(result)
 
+    def test_view_appointments(self):
+        self.manager.book_appointment('John Doe', 'Dr. Smith', '2024-10-15 10:00 AM')
+        appointments = self.manager.view_appointments('Dr. Smith')
+        self.assertEqual(len(appointments), 1)
 
-class TestExpense(unittest.TestCase):
-    def test_expense_initialization(self):
-        user = create_user('Alice')
-        expense = create_expense('Dinner', 100, user)
-        self.assertEqual(expense.description, 'Dinner')
-        self.assertEqual(expense.amount, 100)
-        self.assertEqual(expense.paid_by, user)
+    def test_cancel_appointment(self):
+        self.manager.book_appointment('John Doe', 'Dr. Smith', '2024-10-15 10:00 AM')
+        result = self.manager.cancel_appointment('John Doe', 'Dr. Smith', '2024-10-15 10:00 AM')
+        self.assertTrue(result)
+        self.assertEqual(len(self.manager.current_appointments()), 0)
 
-    def test_split_expense_equal(self):
-        user1 = create_user('Alice')
-        user2 = create_user('Bob')
-        user3 = create_user('Charlie')
-        expense = create_expense('Dinner', 90, user1)
-        group = Group('group1')
-        group.add_user(user1)
-        group.add_user(user2)
-        group.add_user(user3)
-        group.add_expense(expense)
-        self.assertEqual(user1.balance, -90.0)
-        self.assertEqual(user2.balance, 30.0)
-        self.assertEqual(user3.balance, 30.0)
+        # Try to cancel a non-existing appointment
+        result = self.manager.cancel_appointment('Jane Doe', 'Dr. Smith', '2024-10-15 10:00 AM')
+        self.assertFalse(result)
 
-
-class TestGroup(unittest.TestCase):
-    def test_add_user(self):
-        group = Group('group1')
-        user = create_user('Alice')
-        group.add_user(user)
-        self.assertEqual(len(group.users), 1)
-
-    def test_add_expense(self):
-        group = Group('group1')
-        user = create_user('Alice')
-        group.add_user(user)
-        expense = create_expense('Coffee', 50, user)
-        group.add_expense(expense)
-        self.assertEqual(len(group.expenses), 1)
-
-    def test_get_balances(self):
-        group = Group('group1')
-        user1 = create_user('Alice')
-        user2 = create_user('Bob')
-        group.add_user(user1)
-        group.add_user(user2)
-        expense = create_expense('Lunch', 40, user1)
-        group.add_expense(expense)
-        self.assertEqual(group.get_balances(), {'Alice': -40.0, 'Bob': 20.0})
-
+    def test_list_doctors(self):
+        doctors = self.manager.list_doctors()
+        self.assertIn('Dr. Smith', doctors)
+        self.assertIn('Dr. Jones', doctors)
+        self.assertIn('Dr. Brown', doctors)
 
 if __name__ == '__main__':
     unittest.main()

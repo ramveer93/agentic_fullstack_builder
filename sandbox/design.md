@@ -1,120 +1,85 @@
-# Expense Splitting Application Design
+# Appointment Management System Design
 
 ## Overview
+This design outlines a simple appointment management system for a medical clinic. It will include backend functionality to manage appointments, frontend functionality to provide a user interface for booking and viewing appointments, and unit tests to ensure the system works correctly.
 
-The Expense Splitting Application will consist of three main components:
-1. **Backend Module**: Responsible for handling the business logic, data storage, and user management.
-2. **Frontend Module**: A Gradio interface for user interaction to input expenses and view balances.
-3. **Testing Module**: Unit tests for validating the backend module's logic.
+### Modules and Classes
 
-## Assignments
+#### Backend Module - `backend.py`
+This module will handle the logic related to appointments, including booking, viewing, and canceling appointments. 
 
-- **Backend Engineer**: Implement the backend module.
-- **Frontend Engineer**: Develop the frontend using Gradio.
-- **Test Engineer**: Write unit tests for the backend module.
-
----
-
-## Backend Module Design
-
-### Classes
-
-#### 1. User
-- **Attributes**:
-  - `user_id: str`
-  - `name: str`
-  - `balance: float`
-- **Methods**:
-  - `__init__(self, user_id: str, name: str) -> None`
-  - `update_balance(self, amount: float) -> None`
-
-#### 2. Expense
-- **Attributes**:
-  - `expense_id: str`
-  - `description: str`
-  - `amount: float`
-  - `paid_by: User`
-- **Methods**:
-  - `__init__(self, expense_id: str, description: str, amount: float, paid_by: User) -> None`
-  - `split_expense(self, users: List[User]) -> Dict[str, float]`
-
-#### 3. Group
-- **Attributes**:
-  - `group_id: str`
-  - `users: List[User]`
-  - `expenses: List[Expense]`
-- **Methods**:
-  - `__init__(self, group_id: str) -> None`
-  - `add_user(self, user: User) -> None`
-  - `add_expense(self, expense: Expense) -> None`
-  - `get_balances(self) -> Dict[str, float]`
-
-### Other Functions
-
-- `create_user(name: str) -> User`
-- `create_expense(description: str, amount: float, paid_by: User) -> Expense`
-- `get_group_summary(group: Group) -> Dict[str, float]`
-
----
-
-## Frontend Module Design (Gradio Application)
-
-### Gradio Interface
-
-#### Functions
-
-- `create_user_interface() -> gr.Interface`
-  - Parameters: `user_name: str`
-  - Output: `User details`
-
-- `add_expense_interface() -> gr.Interface`
-  - Parameters: 
-    - `description: str`
-    - `amount: float`
-    - `paid_by: str (User name)`
-  - Outputs: `Updated balances`
+1. **Class: `Appointment`**
+   - **Attributes:**
+     - `patient_name: str`
+     - `doctor_name: str`
+     - `time_slot: str`
+   - **Methods:**
+     - `__init__(self, patient_name: str, doctor_name: str, time_slot: str)`
+     - `__str__(self) -> str`
   
-- `view_balances_interface() -> gr.Interface`
-  - Parameters: None
-  - Output: `List of users and their current balances`
+2. **Class: `AppointmentManager`**
+   - **Attributes:**
+     - `appointments: List[Appointment]`
+     - `doctors: List[str]`
+   - **Methods:**
+     - `__init__(self)`
+     - `book_appointment(self, patient_name: str, doctor_name: str, time_slot: str) -> bool`
+     - `view_appointments(self, doctor_name: str) -> List[Appointment]`
+     - `cancel_appointment(self, patient_name: str, doctor_name: str, time_slot: str) -> bool`
+     - `list_doctors(self) -> List[str]`
 
-### Main App Function
+3. **Function: `is_time_slot_available(doctor_name: str, time_slot: str) -> bool`**
+   - Checks if the given time slot is available for the specified doctor.
 
-- `main_app() -> None`
-  - Description: Launches the Gradio app with the above interfaces.
+4. **Function: `current_appointments(self) -> List[Appointment]`**
+   - Returns a list of current appointments.
 
-### Gradio Component Considerations
+#### Frontend Module - `app.py`
+This module will handle the user interface for the appointment management system using Gradio.
 
-- Important kwargs in `gr.Interface`:
-  - Use `inputs` and `outputs` as lists containing the types: `gr.Text`, `gr.Number`, etc.
-  - The `title` and `description` parameters for informative UI.
-  - Use `live=True` for real-time updates when necessary.
-  
----
+1. **Function: `book_appointment_interface(patient_name: str, doctor_name: str, time_slot: str) -> str`**
+   - Input: `patient_name: str`, `doctor_name: str`, `time_slot: str`
+   - Output: Confirmation message (booked or error message).
 
-## Testing Module Design
+2. **Function: `view_appointments_interface(doctor_name: str) -> List[str]`**
+   - Input: `doctor_name: str`
+   - Output: List of appointments for the specified doctor.
 
-### Unit Tests
+3. **Function: `cancel_appointment_interface(patient_name: str, doctor_name: str, time_slot: str) -> str`**
+   - Input: `patient_name: str`, `doctor_name: str`, `time_slot: str`
+   - Output: Confirmation of cancellation.
 
-- **Test Cases for User Class**
-  - `test_user_initialization() -> None`
-  - `test_update_balance_increase() -> None`
-  - `test_update_balance_decrease() -> None`
+4. **Function: `list_doctors_interface() -> List[str]`**
+   - Output: List of available doctors.
 
-- **Test Cases for Expense Class**
-  - `test_expense_initialization() -> None`
-  - `test_split_expense_equal() -> None`
-  
-- **Test Cases for Group Class**
-  - `test_add_user() -> None`
-  - `test_add_expense() -> None`
-  - `test_get_balances() -> None`
+5. **Gradio Interface Setup:**
+   - `gr.Interface(...)` to bind the above functions to the user interface.
 
-### Test Execution
+### Test Module - Unit Tests
+The test engineer will create a separate test file for unit tests.
 
-- `run_tests() -> None`
-  - Description: Executes all unit tests and checks assertions.
+#### Test Cases in a Module (e.g., `test_backend.py`)
+1. **Test: `test_book_appointment()`**
+   - Ensure that booking an appointment works correctly and prevents double-booking.
 
----
+2. **Test: `test_view_appointments()`**
+   - Verify that viewing appointments returns expected results for a given doctor.
 
-This design outlines the structure and responsibilities of each module and engineer required to implement the expense splitting application. Each engineer will create their respective components in the same sandbox directory, adhering to the design specifications outlined above.
+3. **Test: `test_cancel_appointment()`**
+   - Check that canceling an appointment works correctly.
+
+4. **Test: `test_list_doctors()`**
+   - Ensure that the list of doctors is returned correctly.
+
+### Engineer Assignments
+- **Backend Engineer:**
+  - File: `backend.py`
+  - Responsibilities: Implement `Appointment`, `AppointmentManager` classes and the related functions for booking, viewing, and cancelling appointments.
+
+- **Frontend Engineer:**
+  - File: `app.py`
+  - Responsibilities: Implement user interface functions using Gradio, ensuring proper inputs/outputs and integrating with the backend functionality.
+
+- **Test Engineer:**
+  - File: `test_backend.py`
+  - Responsibilities: Write unit tests for the backend functionalities to ensure correctness and robustness.

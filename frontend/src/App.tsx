@@ -80,7 +80,13 @@ function App() {
       if (data.files && data.files.length > 0) {
         setSelectedFile(data.files[0].path);
       }
-      setDesignCode(data.design_code || '');
+      let dc = data.design_code || '';
+      if (dc.startsWith('```markdown')) {
+        dc = dc.replace(/^```markdown\n*/i, '').replace(/\n*```$/i, '');
+      } else if (dc.startsWith('```')) {
+        dc = dc.replace(/^```\n*/i, '').replace(/\n*```$/i, '');
+      }
+      setDesignCode(dc);
     } catch (e) {
       console.error("Failed to fetch code", e);
     }

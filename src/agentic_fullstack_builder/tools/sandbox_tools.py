@@ -88,7 +88,11 @@ def run_sandbox_python(filename: str) -> str:
         text=True,
         timeout=300,
     )
-    return result.stdout
+    # Combine stdout and stderr so the agent sees errors!
+    output = result.stdout
+    if result.stderr:
+        output += "\n" + result.stderr
+    return output
 
 sandbox_tools = [list_sandbox_files, read_sandbox_file, write_sandbox_file, run_sandbox_python]
 
