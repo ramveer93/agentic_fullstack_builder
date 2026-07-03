@@ -47,6 +47,69 @@ This example, unmodified, will run the create a `report.md` file with the output
 
 The agentic-fullstack-builder Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
 
+## 🧠 Agent Architecture
+
+Our system operates using a specialized team of autonomous AI agents working collaboratively in a shared local sandbox. Here is how they interact when you submit a prompt:
+
+```mermaid
+graph TD
+    User([User]) -->|Provides Requirements| WebUI[React Web Interface]
+    WebUI -->|POST /api/build| Backend[FastAPI Server]
+    
+    Backend -->|Spawns Subprocess| CrewCLI[run_crew_cli.py]
+    
+    subgraph "🤖 Agentic Engineering Team"
+        Lead[Lead Architect] 
+        BackendDev[Python Backend Engineer]
+        FrontendDev[Gradio Frontend Engineer]
+        QA[QA Test Engineer]
+        
+        Lead -->|1. Creates design.md| BackendDev
+        Lead -->|1. Creates design.md| FrontendDev
+        BackendDev -->|2. Writes backend.py| QA
+        FrontendDev -->|3. Writes app.py| QA
+    end
+    
+    CrewCLI --> Lead
+    
+    BackendDev -.->|Uses WriteFileTool| Sandbox[(Local Sandbox)]
+    FrontendDev -.->|Uses WriteFileTool| Sandbox
+    QA -.->|4. Uses ExecuteCommandTool to run tests| Sandbox
+    
+    CrewCLI -.->|Streams raw stdout logs| Backend
+    Backend -.->|Filters & Sends Clean Logs| WebUI
+```
+
+### Agent Configuration Code
+Agents are defined using YAML and connected to their tools in python. Here is a quick look at how the agents are wired up with our custom file-system tools:
+
+```python
+# src/agentic_fullstack_builder/crew.py
+from crewai import Agent, Crew, Process, Task
+from crewai.project import CrewBase, agent, crew, task
+from agentic_fullstack_builder.tools import sandbox_tools
+
+@CrewBase
+class EngineeringTeam:
+    """The Autonomous Engineering Team"""
+
+    @agent
+    def engineering_lead(self) -> Agent:
+        return Agent(
+            config=self.agents_config['engineering_lead'],
+            tools=[sandbox_tools.WriteFileTool(), sandbox_tools.ExecuteCommandTool()],
+            verbose=True
+        )
+
+    @agent
+    def python_backend_engineer(self) -> Agent:
+        return Agent(
+            config=self.agents_config['python_backend_engineer'],
+            tools=[sandbox_tools.WriteFileTool()],
+            verbose=True
+        )
+```
+
 ## Support
 
 For support, questions, or feedback regarding the AgenticFullstackBuilder Crew or crewAI.
@@ -112,67 +175,3 @@ This project is built on a modern, high-performance stack designed for AI agent 
 * **[Gradio](https://www.gradio.app/)**: The framework our AI agents use to rapidly spin up and serve web interfaces dynamically inside the sandbox.
 * **[uv](https://github.com/astral-sh/uv)**: Astral's ultra-fast Python package installer and environment manager, used to run the isolated agent sandbox securely.
 
----
-
-## 🧠 Agent Architecture
-
-Our system operates using a specialized team of autonomous AI agents working collaboratively in a shared local sandbox. Here is how they interact when you submit a prompt:
-
-```mermaid
-graph TD
-    User([User]) -->|Provides Requirements| WebUI[React Web Interface]
-    WebUI -->|POST /api/build| Backend[FastAPI Server]
-    
-    Backend -->|Spawns Subprocess| CrewCLI[run_crew_cli.py]
-    
-    subgraph "🤖 Agentic Engineering Team"
-        Lead[Lead Architect] 
-        BackendDev[Python Backend Engineer]
-        FrontendDev[Gradio Frontend Engineer]
-        QA[QA Test Engineer]
-        
-        Lead -->|1. Creates design.md| BackendDev
-        Lead -->|1. Creates design.md| FrontendDev
-        BackendDev -->|2. Writes backend.py| QA
-        FrontendDev -->|3. Writes app.py| QA
-    end
-    
-    CrewCLI --> Lead
-    
-    BackendDev -.->|Uses WriteFileTool| Sandbox[(Local Sandbox)]
-    FrontendDev -.->|Uses WriteFileTool| Sandbox
-    QA -.->|4. Uses ExecuteCommandTool to run tests| Sandbox
-    
-    CrewCLI -.->|Streams raw stdout logs| Backend
-    Backend -.->|Filters & Sends Clean Logs| WebUI
-```
-
-### Agent Configuration Code
-Agents are defined using YAML and connected to their tools in python. Here is a quick look at how the agents are wired up with our custom file-system tools:
-
-```python
-# src/agentic_fullstack_builder/crew.py
-from crewai import Agent, Crew, Process, Task
-from crewai.project import CrewBase, agent, crew, task
-from agentic_fullstack_builder.tools import sandbox_tools
-
-@CrewBase
-class EngineeringTeam:
-    """The Autonomous Engineering Team"""
-
-    @agent
-    def engineering_lead(self) -> Agent:
-        return Agent(
-            config=self.agents_config['engineering_lead'],
-            tools=[sandbox_tools.WriteFileTool(), sandbox_tools.ExecuteCommandTool()],
-            verbose=True
-        )
-
-    @agent
-    def python_backend_engineer(self) -> Agent:
-        return Agent(
-            config=self.agents_config['python_backend_engineer'],
-            tools=[sandbox_tools.WriteFileTool()],
-            verbose=True
-        )
-```
